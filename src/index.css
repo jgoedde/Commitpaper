@@ -1,1 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Merriweather:wght@400;700&family=Roboto:wght@300;400;700&display=swap");
 @import 'tailwindcss';
+
+@theme {
+    --font-headline: 'Playfair Display', serif;
+    --font-body: 'Merriweather', serif;
+    --font-ui: 'Roboto', sans-serif;
+    --font-oldpress: "Courier New", Courier, monospace;
+}
