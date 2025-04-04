@@ -15,9 +15,6 @@ export function RepoHeadline({ activity }: { activity: GitHubActivity }) {
         repo: activity.repo,
         pullNumber: activity.id,
     })
-
-    activity.body_text = ''
-
     const body = useMemo(() => {
         if (activity.body_text == null) {
             return ''
