@@ -2,6 +2,7 @@ import { GitHubActivity } from './use-top-repos.ts'
 import { formatDistanceToNow } from 'date-fns'
 import { useMemo } from 'react'
 import { usePR } from './use-pr.ts'
+import { de } from 'date-fns/locale'
 
 function getRandomHex(size: number): string {
     return [...Array(size)]
@@ -46,7 +47,17 @@ export function RepoHeadline({ activity }: { activity: GitHubActivity }) {
                         minute: 'numeric',
                     })}
                 </b>
-                , {body.trim() !== '' && <>{body}</>}
+                ,{' '}
+                {body.trim() !== '' && (
+                    <>
+                        {body}
+                        <br />
+                        <br />
+                    </>
+                )}
+                Der Pull Request weist <b>{commitsCount} Commits</b> auf und er
+                erhielt <b>{commentsCount} Kommentare</b> seit seiner
+                Erstellung. Er ist damit also eher klein.
             </div>
             <div className={'my-6 flex items-center space-x-2 text-sm'}>
                 <div
@@ -62,32 +73,13 @@ export function RepoHeadline({ activity }: { activity: GitHubActivity }) {
             >
                 <div className="bg-black p-1 text-white">{activity.state}</div>
                 <span>
-                    Updated{' '}
+                    Letztes Update{' '}
                     {formatDistanceToNow(activity.updated_at, {
                         includeSeconds: false,
                         addSuffix: true,
+                        locale: de,
                     })}
                 </span>
-            </div>
-            <div
-                className={
-                    'flex items-center justify-between gap-2 space-x-1 text-end text-sm'
-                }
-            >
-                <div className="min-w-6 bg-black p-1 text-center text-white">
-                    {commitsCount}
-                </div>
-                <span>Commits</span>
-            </div>
-            <div
-                className={
-                    'flex items-center justify-between gap-2 space-x-1 text-end text-sm'
-                }
-            >
-                <div className="min-w-6 bg-black p-1 text-center text-white">
-                    {commentsCount}
-                </div>
-                <span>Kommentare</span>
             </div>
         </div>
     )
