@@ -1,8 +1,12 @@
 import { format } from 'date-fns'
+import { useTopRepos } from './use-top-repos.ts'
+import { RepoHeadline } from './RepoHeadline.tsx'
 
 const user = import.meta.env.VITE_GITHUB_USER
 
 function App() {
+    const { activities } = useTopRepos(user)
+
     return (
         <div className={'container mx-auto max-w-6xl px-3'}>
             <div className={'py-3'}>
@@ -24,51 +28,30 @@ function App() {
                 </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-5 grid-rows-5 gap-4">
-                <div className="col-span-3 row-span-3">
-                    <img width={'100%'} src={'https://placecats.com/300/200'} />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5 md:grid-rows-[auto_auto_auto_auto_auto]">
+                <div className="row-span-5 flex flex-col space-y-8">
+                    {activities[1] != null && (
+                        <RepoHeadline activity={activities[1]} />
+                    )}
+                    {activities[2] != null && (
+                        <RepoHeadline activity={activities[2]} />
+                    )}
                 </div>
-                <div className="col-span-2 col-start-4 row-span-5">
-                    <div className={'space-y-3'}>
-                        <h3
-                            className={
-                                'font-headline text-center text-xl/5 font-bold'
-                            }
-                        >
-                            fix: update .NET markdown code
-                        </h3>
-                        <p className={'text-sm'}>
-                            Removed one square bracket, there was one too many.
-                        </p>
-                    </div>
-                    <div
-                        className={
-                            'mt-3 flex items-center justify-end space-x-2 text-sm'
-                        }
-                    >
-                        <div className={'size-3 bg-teal-500'} />
-                        <span className={''}>md-badges</span>
-                    </div>
+                <div className="col-span-3 row-span-2 h-80">
+                    <img
+                        src={'/pie-chart-mock.png'}
+                        className="mx-auto max-h-full object-contain grayscale"
+                    />
                 </div>
-                <div className="col-span-3 row-span-2 row-start-4">
-                    <div className={'space-y-3'}>
-                        <h3
-                            className={
-                                'font-headline text-center text-xl/5 font-bold'
-                            }
-                        >
-                            Remove calendar iOS test stage
-                        </h3>
-                        <p className={'text-sm'}>Closes #8581</p>
-                    </div>
-                    <div
-                        className={
-                            'mt-3 flex items-center justify-end space-x-2 text-sm'
-                        }
-                    >
-                        <div className={'size-3 bg-red-500'} />
-                        <span className={''}>tutanota</span>
-                    </div>
+                <div className="col-start-5 row-span-5">
+                    {activities[3] != null && (
+                        <RepoHeadline activity={activities[3]} />
+                    )}
+                </div>
+                <div className="col-span-3 col-start-2 row-start-3">
+                    {activities[0] != null && (
+                        <RepoHeadline activity={activities[0]} />
+                    )}
                 </div>
             </div>
 
