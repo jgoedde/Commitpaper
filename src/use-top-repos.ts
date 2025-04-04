@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { z } from 'zod'
+import { addDays } from 'date-fns'
 
 const GitHubRepoSchema = z.object({
     id: z.number(),
@@ -19,7 +20,7 @@ const GitHubPRSchema = z.object({
     id: z.number(),
     title: z.string(),
     body_text: z.string().nullable(),
-    state: z.union([z.literal('open'), z.literal('closed')]),
+    state: z.enum(['open', 'closed']),
     updated_at: z.coerce.date(),
     created_at: z.coerce.date(),
     user: z.object({
@@ -27,14 +28,26 @@ const GitHubPRSchema = z.object({
     }),
 })
 
-type GitHubPullRequest = z.infer<typeof GitHubPRSchema>
+const GitHubCommitSchema = z.object({
+    author: z.object({ login: z.string() }),
+    commit: z.object({
+        message: z.string(),
+        committer: z.object({ date: z.coerce.date() }),
+    }),
+})
 
-type GitHubCommit = GitHubPullRequest
+export type GitHubPullRequest = z.infer<typeof GitHubPRSchema> & {
+    type: 'pull'
+    repo: string
+}
+export type GitHubCommit = z.infer<typeof GitHubCommitSchema> & {
+    type: 'commit'
+    repo: string
+}
 
-export type GitHubActivity = { repo: string } & (
-    | GitHubPullRequest
-    | GitHubCommit
-)
+export type GitHubActivity = (GitHubPullRequest | GitHubCommit) & {
+    repo: string
+}
 
 export function useTopRepos(user: string) {
     const [isLoading, setIsLoading] = useState(true)
@@ -103,17 +116,79 @@ export function useTopRepos(user: string) {
         [user]
     )
 
+    const getLatestCommit = useCallback<
+        (repo: string) => Promise<GitHubActivity>
+    >(
+        async (repo) => {
+            const response = await fetch(
+                `https://api.github.com/repos/${user}/${repo}/commits?per_page=1&committer=${user}`
+            )
+
+            const dummyCommit: GitHubCommit = {
+                commit: {
+                    message: 'This is a dummy commit message',
+                    committer: { date: addDays(new Date(), -2) },
+                },
+                author: { login: 'aUser' },
+                type: 'commit',
+                repo,
+            }
+            if (!response.ok) {
+                return Promise.resolve(dummyCommit)
+                // throw new Error('Failed to fetch commits')
+            }
+
+            const data = await response.json()
+
+            const res: GitHubActivity = {
+                ...(z.array(GitHubCommitSchema).parse(data)?.[0] ??
+                    dummyCommit),
+                repo,
+                type: 'commit',
+            }
+
+            return res
+        },
+        [user]
+    )
+
     useEffect(() => {
         const fetchPulls = async () => {
-            const activities: (
-                | ({ repo: string } & GitHubPullRequest)
-                | null
-            )[] = await Promise.all(
-                repos.map(async (repo) => {
-                    const pull = await getLatestPull(repo.name)
-                    return pull ? { ...pull, repo: repo.name } : null
-                })
+            const activities: GitHubActivity[] = (
+                await Promise.all(
+                    repos.map(async (repo) => {
+                        const pull = await getLatestPull(repo.name)
+                        return pull
+                            ? ({
+                                  ...pull,
+                                  type: 'pull',
+                                  repo: repo.name,
+                              } as GitHubActivity)
+                            : null
+                    })
+                )
+            ).filter((x) => x != null) as GitHubActivity[]
+
+            // check for all repos and see if there are any missing
+            const missingRepos = repos.filter((repo) =>
+                activities.every((activity) => activity?.repo !== repo.name)
             )
+
+            activities.push(
+                ...((await Promise.all(
+                    missingRepos.map(async (repo) => {
+                        const commit = await getLatestCommit(repo.name)
+                        return commit
+                            ? ({
+                                  ...commit,
+                                  type: 'commit',
+                                  repo: repo.name,
+                              } as GitHubActivity)
+                            : null
+                    })
+                )) as GitHubActivity[])
+            )
+
             setActivities(
                 activities.filter((a) => a !== null) as GitHubActivity[]
             )
@@ -121,7 +196,7 @@ export function useTopRepos(user: string) {
         }
 
         void fetchPulls()
-    }, [getLatestPull, repos])
+    }, [getLatestCommit, getLatestPull, repos])
 
     return {
         activities,
