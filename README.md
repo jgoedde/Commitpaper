@@ -4,6 +4,8 @@ Commitpaper is a web application that lets you read your favourite users' GitHub
 
 ## Running the app
 
+*Information*: Make sure Node is installed. The project was built with Node v22.
+
 Install the dependencies with npm and run the dev build:
 
 ```bash
