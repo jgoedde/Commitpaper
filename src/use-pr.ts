@@ -8,13 +8,13 @@ export function usePR({
     owner: string
     repository: string
     pullNumber: number
-}) {
-    const { data: files } = useSWRImmutable<number>( // Immutable to not drain rate limit
+}): { filesCount: number; commentsCount: number; hasError: boolean } {
+    const { data: files, error: filesError } = useSWRImmutable<number>( // Immutable to not drain rate limit
         `https://api.github.com/repos/${owner}/${repository}/pulls/${pullNumber}/files`,
         fetcher
     )
 
-    const { data: comments } = useSWRImmutable<number>( // Immutable to not drain rate limit
+    const { data: comments, error: commentsError } = useSWRImmutable<number>( // Immutable to not drain rate limit
         `https://api.github.com/repos/${owner}/${repository}/pulls/${pullNumber}/comments`,
         fetcher
     )
@@ -25,6 +25,7 @@ export function usePR({
     return {
         filesCount,
         commentsCount,
+        hasError: filesError || commentsError,
     }
 }
 

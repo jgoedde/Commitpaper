@@ -6,7 +6,7 @@ import { de } from 'date-fns/locale'
 import { getRandomHex } from '../color-utils.ts'
 
 export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
-    const { filesCount, commentsCount } = usePR({
+    const { filesCount, commentsCount, hasError } = usePR({
         owner: pr.user.login,
         repository: pr.repository,
         pullNumber: pr.number,
@@ -55,21 +55,26 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                 {body.trim() !== '' && <>, {body}</>}
                 <br />
                 <br />
-                <span>
-                    Der Pull Request wurde von {pr.user.login} erstellt und
-                    umfasst insgesamt <em>{filesCount} geänderte</em>{' '}
-                    Dateien.&nbsp;
-                </span>
-                {commentsCount > 0 && (
-                    <span>
-                        Seit seiner Erstellung wurde er mit {commentsCount}{' '}
-                        Kommentaren diskutiert.&nbsp;
-                    </span>
+                {!hasError && (
+                    <div>
+                        <span>
+                            Der Pull Request wurde von {pr.user.login} erstellt
+                            und umfasst insgesamt{' '}
+                            <em>{filesCount} geänderte</em> Dateien.&nbsp;
+                        </span>
+                        {commentsCount > 0 && (
+                            <span>
+                                Seit seiner Erstellung wurde er mit{' '}
+                                {commentsCount} Kommentaren diskutiert.&nbsp;
+                            </span>
+                        )}
+                        <span>
+                            Auf Basis der geänderten Dateien lässt sich der
+                            Umfang des Pull Requests als <em>{prSize}</em>{' '}
+                            einstufen.
+                        </span>
+                    </div>
                 )}
-                <span>
-                    Auf Basis der geänderten Dateien lässt sich der Umfang des
-                    Pull Requests als <em>{prSize}</em> einstufen.
-                </span>
             </div>
             <div className={'my-6 flex items-center space-x-2 text-sm'}>
                 <div
