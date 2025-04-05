@@ -47,7 +47,7 @@ export function useRepositoryActivities(user: string) {
     >(
         async (repository) => {
             const response = await fetch(
-                `https://api.github.com/repos/${user}/${repository}/commits?per_page=1&committer=${user}`
+                `https://api.github.com/repos/${user}/${repository}/commits?per_page=1`
             )
 
             if (!response.ok) {
