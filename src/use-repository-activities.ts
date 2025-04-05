@@ -137,7 +137,7 @@ export function useRepositoryActivities(user: string) {
 }
 
 const GitHubPRSchema = z.object({
-    id: z.number(),
+    number: z.number(),
     title: z.string(),
     body_text: z.string().nullable(),
     state: z.enum(['open', 'closed']),

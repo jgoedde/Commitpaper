@@ -1,29 +1,4 @@
-async function fetchPRData(
-    owner: string,
-    repository: string,
-    pullNumber: number
-) {
-    const [commitsResponse, commentsResponse] = await Promise.all([
-        fetch(
-            `https://api.github.com/repos/${owner}/${repository}/pulls/${pullNumber}/commits`
-        ),
-        fetch(
-            `https://api.github.com/repos/${owner}/${repository}/issues/${pullNumber}/comments`
-        ),
-    ])
-
-    if (!commitsResponse.ok || !commentsResponse.ok) {
-        throw new Error('Failed to fetch pull request details')
-    }
-
-    const commits = await commitsResponse.json()
-    const comments = await commentsResponse.json()
-
-    return {
-        commitsCount: commits.length,
-        commentsCount: comments.length,
-    }
-}
+import useSWRImmutable from 'swr/immutable'
 
 export function usePR({
     owner,
@@ -34,6 +9,37 @@ export function usePR({
     repository: string
     pullNumber: number
 }) {
-    console.info('fetching PR data for', { owner, repository, pullNumber })
-    return { commitsCount: 2, commentsCount: 3 }
+    const { data: files } = useSWRImmutable<number>( // Immutable to not drain rate limit
+        `https://api.github.com/repos/${owner}/${repository}/pulls/${pullNumber}/files`,
+        fetcher
+    )
+
+    const { data: comments } = useSWRImmutable<number>( // Immutable to not drain rate limit
+        `https://api.github.com/repos/${owner}/${repository}/pulls/${pullNumber}/comments`,
+        fetcher
+    )
+
+    const filesCount = files ?? 0
+    const commentsCount = comments ?? 0
+
+    return {
+        filesCount,
+        commentsCount,
+    }
+}
+
+/**
+ * Fetches data from the given URL and returns the length of the data array.
+ *
+ * @throws {Error} - Throws an error if the fetch operation fails.
+ */
+const fetcher: (url: string) => Promise<number> = async (url) => {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch data for ${url}`)
+    }
+
+    const data: unknown[] = await response.json()
+    return data.length
 }

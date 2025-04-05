@@ -6,10 +6,10 @@ import { de } from 'date-fns/locale'
 import { getRandomHex } from '../color-utils.ts'
 
 export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
-    const { commitsCount, commentsCount } = usePR({
+    const { filesCount, commentsCount } = usePR({
         owner: pr.user.login,
         repository: pr.repository,
-        pullNumber: pr.id,
+        pullNumber: pr.number,
     })
 
     const body = useMemo(() => {
@@ -25,6 +25,14 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
         const truncatedText = text.slice(0, maxLength)
         return truncatedText + '...'
     }, [pr])
+
+    const prSize = useMemo(() => {
+        return (
+            Object.entries(PR_SIZE_MAP).find(([key]) => {
+                return filesCount <= parseInt(key)
+            })?.[1] ?? 'sehr groß'
+        )
+    }, [filesCount])
 
     return (
         <div className={'space-y-3'}>
@@ -47,9 +55,21 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                 {body.trim() !== '' && <>, {body}</>}
                 <br />
                 <br />
-                Der Pull Request weist <b>{commitsCount} Commits</b> auf und er
-                erhielt <b>{commentsCount} Kommentare</b> seit seiner
-                Erstellung. Er ist damit also eher klein.
+                <span>
+                    Der Pull Request wurde von {pr.user.login} erstellt und
+                    umfasst insgesamt <em>{filesCount} geänderte</em>{' '}
+                    Dateien.&nbsp;
+                </span>
+                {commentsCount > 0 && (
+                    <span>
+                        Seit seiner Erstellung wurde er mit {commentsCount}{' '}
+                        Kommentaren diskutiert.&nbsp;
+                    </span>
+                )}
+                <span>
+                    Auf Basis der geänderten Dateien lässt sich der Umfang des
+                    Pull Requests als <em>{prSize}</em> einstufen.
+                </span>
             </div>
             <div className={'my-6 flex items-center space-x-2 text-sm'}>
                 <div
@@ -75,4 +95,11 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
             </div>
         </div>
     )
+}
+
+const PR_SIZE_MAP = {
+    3: 'eher klein',
+    5: 'klein',
+    10: 'mittelgroß',
+    20: 'groß',
 }
