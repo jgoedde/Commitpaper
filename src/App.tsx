@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { useRepositoryActivities } from './use-repository-activities.ts'
 
-import { ActivityHeadline } from './ActivityHeadline.tsx'
+import { ActivityHeadline } from './headlines/ActivityHeadline.tsx'
 
 const user = import.meta.env.VITE_GITHUB_USER
 

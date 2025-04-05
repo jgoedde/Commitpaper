@@ -1,5 +1,5 @@
-import { GitHubCommit } from './use-repository-activities.ts'
-import { getRandomHex } from './color-utils.ts'
+import { GitHubCommit } from '../use-repository-activities.ts'
+import { getRandomHex } from '../color-utils.ts'
 import { useMemo } from 'react'
 
 export function CommitActivityHeadline({ commit }: { commit: GitHubCommit }) {

@@ -1,9 +1,9 @@
-import { GitHubPullRequest } from './use-repository-activities.ts'
+import { GitHubPullRequest } from '../use-repository-activities.ts'
 import { formatDistanceToNow } from 'date-fns'
 import { useMemo } from 'react'
-import { usePR } from './use-pr.ts'
+import { usePR } from '../use-pr.ts'
 import { de } from 'date-fns/locale'
-import { getRandomHex } from './color-utils.ts'
+import { getRandomHex } from '../color-utils.ts'
 
 export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
     const { commitsCount, commentsCount } = usePR({

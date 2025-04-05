@@ -1,4 +1,4 @@
-import { GitHubActivity } from './use-repository-activities.ts'
+import { GitHubActivity } from '../use-repository-activities.ts'
 import { PrActivityHeadline } from './PrActivityHeadline.tsx'
 import { CommitActivityHeadline } from './CommitActivityHeadline.tsx'
 
