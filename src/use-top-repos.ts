@@ -121,7 +121,7 @@ export function useTopRepos(user: string) {
     >(
         async (repo) => {
             const response = await fetch(
-                `https://api.github.com/repos/${user}/${repo}/commits?per_page=1&committer=${user}`
+                `https://api.github.com/repos/${user}/${repo}/commits?per_page=1`
             )
 
             const dummyCommit: GitHubCommit = {
