@@ -1,12 +1,12 @@
 import { format } from 'date-fns'
-import { useTopRepos } from './use-top-repos.ts'
+import { useRepositoryActivities } from './use-repository-activities.ts'
 
 import { ActivityHeadline } from './ActivityHeadline.tsx'
 
 const user = import.meta.env.VITE_GITHUB_USER
 
 function App() {
-    const { activities } = useTopRepos(user)
+    const { activities } = useRepositoryActivities(user)
 
     return (
         <div className={'container mx-auto max-w-6xl px-3'}>

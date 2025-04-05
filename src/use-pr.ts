@@ -1,10 +1,14 @@
-async function fetchPRData(owner: string, repo: string, pullNumber: number) {
+async function fetchPRData(
+    owner: string,
+    repository: string,
+    pullNumber: number
+) {
     const [commitsResponse, commentsResponse] = await Promise.all([
         fetch(
-            `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/commits`
+            `https://api.github.com/repos/${owner}/${repository}/pulls/${pullNumber}/commits`
         ),
         fetch(
-            `https://api.github.com/repos/${owner}/${repo}/issues/${pullNumber}/comments`
+            `https://api.github.com/repos/${owner}/${repository}/issues/${pullNumber}/comments`
         ),
     ])
 
@@ -23,13 +27,13 @@ async function fetchPRData(owner: string, repo: string, pullNumber: number) {
 
 export function usePR({
     owner,
-    repo,
+    repository,
     pullNumber,
 }: {
     owner: string
-    repo: string
+    repository: string
     pullNumber: number
 }) {
-    console.info('fetching PR data for', { owner, repo, pullNumber })
+    console.info('fetching PR data for', { owner, repository, pullNumber })
     return { commitsCount: 2, commentsCount: 3 }
 }

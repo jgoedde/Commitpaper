@@ -1,4 +1,4 @@
-import { GitHubCommit } from './use-top-repos.ts'
+import { GitHubCommit } from './use-repository-activities.ts'
 import { getRandomHex } from './color-utils.ts'
 import { useMemo } from 'react'
 
@@ -41,7 +41,7 @@ export function CommitActivityHeadline({ commit }: { commit: GitHubCommit }) {
                     className={`size-3`}
                     style={{ backgroundColor: '#' + getRandomHex(6) }}
                 />
-                <span className={''}>{commit.repo}</span>
+                <span className={''}>{commit.repository}</span>
             </div>
         </div>
     )

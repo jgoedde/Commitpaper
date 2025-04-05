@@ -1,4 +1,4 @@
-import { GitHubPullRequest } from './use-top-repos.ts'
+import { GitHubPullRequest } from './use-repository-activities.ts'
 import { formatDistanceToNow } from 'date-fns'
 import { useMemo } from 'react'
 import { usePR } from './use-pr.ts'
@@ -8,7 +8,7 @@ import { getRandomHex } from './color-utils.ts'
 export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
     const { commitsCount, commentsCount } = usePR({
         owner: pr.user.login,
-        repo: pr.repo,
+        repository: pr.repository,
         pullNumber: pr.id,
     })
 
@@ -44,13 +44,9 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                     })}{' '}
                     Uhr
                 </b>
-                {body.trim() !== '' && (
-                    <>
-                        , {body}
-                        <br />
-                        <br />
-                    </>
-                )}
+                {body.trim() !== '' && <>, {body}</>}
+                <br />
+                <br />
                 Der Pull Request weist <b>{commitsCount} Commits</b> auf und er
                 erhielt <b>{commentsCount} Kommentare</b> seit seiner
                 Erstellung. Er ist damit also eher klein.
@@ -60,7 +56,7 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                     className={`size-3`}
                     style={{ backgroundColor: '#' + getRandomHex(6) }}
                 />
-                <span className={''}>{pr.repo}</span>
+                <span className={''}>{pr.repository}</span>
             </div>
             <div
                 className={
