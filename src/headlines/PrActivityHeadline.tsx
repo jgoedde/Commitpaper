@@ -1,17 +1,10 @@
-import { GitHubPullRequest } from '../use-repository-activities.ts'
 import { formatDistanceToNow } from 'date-fns'
 import { useMemo } from 'react'
-import { usePR } from '../use-pr.ts'
 import { de } from 'date-fns/locale'
 import { getRandomHex } from '../color-utils.ts'
+import { GitHubPullRequest } from '../use-repository-activities.ts'
 
 export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
-    const { filesCount, commentsCount, hasError } = usePR({
-        owner: pr.user.login,
-        repository: pr.repository,
-        pullNumber: pr.number,
-    })
-
     const body = useMemo(() => {
         if (pr.body_text == null) {
             return ''
@@ -29,10 +22,10 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
     const prSize = useMemo(() => {
         return (
             Object.entries(PR_SIZE_MAP).find(([key]) => {
-                return filesCount <= parseInt(key)
+                return pr.changedFiles <= parseInt(key)
             })?.[1] ?? 'sehr groß'
         )
-    }, [filesCount])
+    }, [pr.changedFiles])
 
     return (
         <div className={'space-y-3'}>
@@ -55,26 +48,23 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                 {body.trim() !== '' && <>, {body}</>}
                 <br />
                 <br />
-                {!hasError && (
-                    <div>
+                <div>
+                    <span>
+                        Der Pull Request wurde von {pr.user.login} erstellt und
+                        umfasst insgesamt{' '}
+                        <em>{pr.changedFiles} geänderte Dateien</em>.&nbsp;
+                    </span>
+                    {pr.comments > 0 && (
                         <span>
-                            Der Pull Request wurde von {pr.user.login} erstellt
-                            und umfasst insgesamt{' '}
-                            <em>{filesCount} geänderte Dateien</em>.&nbsp;
+                            Seit seiner Erstellung wurde er mit {pr.comments}{' '}
+                            Kommentaren diskutiert.&nbsp;
                         </span>
-                        {commentsCount > 0 && (
-                            <span>
-                                Seit seiner Erstellung wurde er mit{' '}
-                                {commentsCount} Kommentaren diskutiert.&nbsp;
-                            </span>
-                        )}
-                        <span>
-                            Auf Basis der geänderten Dateien lässt sich der
-                            Umfang des Pull Requests als <em>{prSize}</em>{' '}
-                            einstufen.
-                        </span>
-                    </div>
-                )}
+                    )}
+                    <span>
+                        Auf Basis der geänderten Dateien lässt sich der Umfang
+                        des Pull Requests als <em>{prSize}</em> einstufen.
+                    </span>
+                </div>
             </div>
             <div className={'my-6 flex items-center space-x-2 text-sm'}>
                 <div

@@ -1,11 +1,12 @@
-import { GitHubCommit } from '../use-repository-activities.ts'
 import { getRandomHex } from '../color-utils.ts'
 import { useMemo } from 'react'
+import { GitHubCommit } from '../use-repository-activities.ts'
 
 export function CommitActivityHeadline({ commit }: { commit: GitHubCommit }) {
-    const body = useMemo(() => {
-        return commit.commit.message.split('\n').slice(1).join('\n').trim()
-    }, [commit.commit.message])
+    const body = useMemo(
+        () => commit.commit.message.split('\n').slice(1).join('\n').trim(),
+        [commit.commit.message]
+    )
 
     return (
         <div className={'space-y-3'}>

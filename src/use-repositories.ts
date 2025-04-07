@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { z } from 'zod'
+import { githubApi, GitHubRepository } from './api/github-api.ts'
 
 /**
  * A custom React hook to fetch and manage the top GitHub repositories for a user.
@@ -18,17 +18,8 @@ export function useRepositories(user: string, top: number = 4) {
 
     const loadRepositories = useCallback(async () => {
         setIsLoading(true)
-        const response = await fetch(
-            `https://api.github.com/users/${user}/repos`
-        )
-
-        if (!response.ok) {
-            setIsLoading(false)
-            throw new Error(`Failed to fetch repositories for user: ${user}`)
-        }
-
-        const data = await response.json()
-        const parsedData = z.array(GitHubRepositorySchema).parse(data)
+        const parsedData = await githubApi.getRepositories(user)
+        setIsLoading(false)
 
         // Assign an activity score based on multiple factors
         const rankedRepositories = parsedData.map((repository) => ({
@@ -58,17 +49,3 @@ export function useRepositories(user: string, top: number = 4) {
         isLoading,
     }
 }
-
-const GitHubRepositorySchema = z.object({
-    id: z.number(),
-    html_url: z.string(),
-    pushed_at: z.coerce.date(),
-    created_at: z.coerce.date(),
-    stargazers_count: z.number(),
-    forks_count: z.number(),
-    open_issues_count: z.number(),
-    watchers_count: z.number(),
-    name: z.string(),
-})
-
-export type GitHubRepository = z.infer<typeof GitHubRepositorySchema>

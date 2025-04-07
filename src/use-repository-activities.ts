@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { z } from 'zod'
 import { useRepositories } from './use-repositories.ts'
+import {
+    githubApi,
+    GitHubCommitResponse,
+    GitHubPRResponse,
+} from './api/github-api.ts'
 
 export function useRepositoryActivities(user: string) {
     const { repositories, isLoading: areRepositoriesLoading } =
@@ -9,88 +13,29 @@ export function useRepositoryActivities(user: string) {
     const [isLoading, setIsLoading] = useState(true)
     const [activities, setActivities] = useState<GitHubActivity[]>([])
 
-    const getLatestPull = useCallback<
-        (repository: string) => Promise<GitHubActivity | undefined>
-    >(
-        async (repository) => {
-            setIsLoading(true)
-            const response = await fetch(
-                `https://api.github.com/repos/${user}/${repository}/pulls?per_page=5&state=all`,
-                {
-                    method: 'GET',
-                    headers: { Accept: 'application/vnd.github.text+json' },
-                }
-            )
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch pull requests')
-            }
-
-            const data = await response.json()
-            const parsedData = z.array(GitHubPRSchema).safeParse(data).data
-
-            const latest = parsedData?.[0]
-
-            return latest
-                ? ({
-                      ...latest,
-                      type: 'pull',
-                      repository,
-                  } as GitHubActivity)
-                : undefined
-        },
-        [user]
-    )
-
-    const getLatestCommit = useCallback<
-        (repository: string) => Promise<GitHubActivity | undefined>
-    >(
-        async (repository) => {
-            const response = await fetch(
-                `https://api.github.com/repos/${user}/${repository}/commits?per_page=1`
-            )
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch commits')
-            }
-
-            const data = await response.json()
-
-            const latest = z.array(GitHubCommitSchema).safeParse(data).data?.[0]
-
-            return latest
-                ? {
-                      ...latest,
-                      repository,
-                      type: 'commit',
-                  }
-                : undefined
-        },
-        [user]
-    )
-
     /**
      * Load the activities for the repositories.
      * This will load the latest pull requests and commits for each repository.
      * If a repository has no pull requests, it will load the latest commit.
      */
-    const loadActivities = useCallback<() => Promise<void>>(async () => {
+    const loadActivities = useCallback(async () => {
+        setIsLoading(true)
+
         const activities: (GitHubActivity | null)[] = []
 
         // load the PRs first
         for (const repository of repositories) {
             try {
-                const pull = await getLatestPull(repository.name)
-                if (!pull) {
-                    activities.push(null)
-                    continue
-                }
+                const pull = await githubApi.getLatestPull(
+                    user,
+                    repository.name
+                )
 
-                activities.push({
-                    ...pull,
-                    type: 'pull',
-                    repository: repository.name,
-                } as GitHubActivity)
+                if (pull) {
+                    activities.push(pull)
+                } else {
+                    activities.push(null)
+                }
             } catch (e) {
                 console.error(e)
                 activities.push(null)
@@ -105,22 +50,22 @@ export function useRepositoryActivities(user: string) {
             }
 
             try {
-                const commit = await getLatestCommit(repositories[index].name)
+                const commit = await githubApi.getLatestCommit(
+                    user,
+                    repositories[index].name
+                )
 
-                if (!commit) {
-                    activities[index] = null
-                    continue
+                if (commit) {
+                    activities[index] = commit
                 }
-
-                activities[index] = commit
             } catch (e) {
                 console.error(e)
             }
         }
 
-        setActivities(activities.filter((a) => a !== null) as GitHubActivity[])
         setIsLoading(false)
-    }, [getLatestCommit, getLatestPull, repositories])
+        setActivities(activities.filter((a) => a !== null) as GitHubActivity[])
+    }, [repositories, user])
 
     useEffect(() => {
         if (areRepositoriesLoading) {
@@ -136,35 +81,16 @@ export function useRepositoryActivities(user: string) {
     }
 }
 
-const GitHubPRSchema = z.object({
-    number: z.number(),
-    title: z.string(),
-    body_text: z.string().nullable(),
-    state: z.enum(['open', 'closed']),
-    updated_at: z.coerce.date(),
-    created_at: z.coerce.date(),
-    user: z.object({
-        login: z.string(),
-    }),
-})
-
-const GitHubCommitSchema = z.object({
-    author: z.object({ login: z.string() }),
-    commit: z.object({
-        message: z.string(),
-        committer: z.object({ date: z.coerce.date() }),
-    }),
-})
-
-export type GitHubPullRequest = z.infer<typeof GitHubPRSchema> & {
+export type GitHubPullRequest = GitHubPRResponse & {
     type: 'pull'
     repository: string
+    changedFiles: number
+    comments: number
 }
-export type GitHubCommit = z.infer<typeof GitHubCommitSchema> & {
+
+export type GitHubCommit = GitHubCommitResponse & {
     type: 'commit'
     repository: string
 }
 
-export type GitHubActivity = (GitHubPullRequest | GitHubCommit) & {
-    repository: string
-}
+export type GitHubActivity = GitHubPullRequest | GitHubCommit

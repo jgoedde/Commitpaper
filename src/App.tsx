@@ -1,12 +1,11 @@
 import { format } from 'date-fns'
 import { useRepositoryActivities } from './use-repository-activities.ts'
-
 import { ActivityHeadline } from './headlines/ActivityHeadline.tsx'
 
 const user = import.meta.env.VITE_GITHUB_USER
 
 function App() {
-    const { activities } = useRepositoryActivities(user)
+    const { activities, isLoading } = useRepositoryActivities(user)
 
     return (
         <div className={'container mx-auto max-w-6xl px-3'}>
@@ -50,6 +49,11 @@ function App() {
                     )}
                 </div>
                 <div className="col-span-3 col-start-2 row-start-3">
+                    {isLoading && (
+                        <div className={'text-center'}>
+                            Crunching the numbers...
+                        </div>
+                    )}
                     {activities[0] != null && (
                         <ActivityHeadline activity={activities[0]} />
                     )}
