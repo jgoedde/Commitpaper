@@ -41,7 +41,7 @@ export function CommitActivityHeadline({ commit }: { commit: GitHubCommit }) {
                     className={`size-3`}
                     style={{ backgroundColor: '#' + getRandomHex(6) }}
                 />
-                <span className={''}>{commit.repository}</span>
+                <span>{commit.repository}</span>
             </div>
         </div>
     )

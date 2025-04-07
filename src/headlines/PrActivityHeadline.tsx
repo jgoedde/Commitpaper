@@ -81,7 +81,7 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                     className={`size-3`}
                     style={{ backgroundColor: '#' + getRandomHex(6) }}
                 />
-                <span className={''}>{pr.repository}</span>
+                <span>{pr.repository}</span>
             </div>
             <div
                 className={

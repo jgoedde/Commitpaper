@@ -20,7 +20,7 @@ function App() {
                 <div className={'mt-4'}>
                     <hr />
                     <div className={'my-2 flex justify-between'}>
-                        <span className={''}>Aktivität von @{user}</span>
+                        <span>Aktivität von @{user}</span>
                         <span className={'self-end'}>
                             {format(new Date(), 'dd.MM.yyyy')}
                         </span>
