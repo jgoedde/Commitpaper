@@ -60,7 +60,7 @@ export function PrActivityHeadline({ pr }: { pr: GitHubPullRequest }) {
                         <span>
                             Der Pull Request wurde von {pr.user.login} erstellt
                             und umfasst insgesamt{' '}
-                            <em>{filesCount} geänderte</em> Dateien.&nbsp;
+                            <em>{filesCount} geänderte Dateien</em>.&nbsp;
                         </span>
                         {commentsCount > 0 && (
                             <span>
