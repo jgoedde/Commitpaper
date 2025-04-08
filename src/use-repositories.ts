@@ -18,11 +18,10 @@ export function useRepositories(user: string, top: number = 4) {
 
     const loadRepositories = useCallback(async () => {
         setIsLoading(true)
-        const parsedData = await githubApi.getRepositories(user)
-        setIsLoading(false)
+        const repos = await githubApi.getRepositories(user)
 
         // Assign an activity score based on multiple factors
-        const rankedRepositories = parsedData.map((repository) => ({
+        const rankedRepositories = repos.map((repository) => ({
             ...repository,
             activityScore:
                 (repository.pushed_at.getTime() -
